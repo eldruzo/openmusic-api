@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 const mapDBSongsToModel = ({
-  id, title, year, performer, genre, duration, created_at, updated_at,
+  id, title, year, performer, genre, duration, inserted_at, updated_at,
 }) => ({
   id,
   title,
@@ -8,7 +8,7 @@ const mapDBSongsToModel = ({
   performer,
   genre,
   duration,
-  createdAt: created_at,
+  insertedAt: inserted_at,
   updatedAt: updated_at,
 });
 
