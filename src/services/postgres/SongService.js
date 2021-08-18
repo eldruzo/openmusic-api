@@ -13,7 +13,7 @@ class SongsService {
   async addSong({
     title, year, performer, genre, duration,
   }) {
-    const id = nanoid(16);
+    const id = `song-${nanoid(16)}`;
     const createdAt = new Date().toISOString();
     const updatedAt = createdAt;
 
