@@ -6,9 +6,10 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class PlaylistsService {
-  constructor(songsService) {
+  constructor(songsService, collaborationsService) {
     this._pool = new Pool();
     this._songsService = songsService;
+    this._collaborationsService = collaborationsService;
   }
 
   async addPlaylist({ name, owner }) {
@@ -24,12 +25,13 @@ class PlaylistsService {
     return result.rows[0].id;
   }
 
-  async getPlaylists(owner) {
+  async getPlaylists(userId) {
     const result = await this._pool.query({
       text: `SELECT playlists.id, playlists.name, users.username FROM playlists   
       LEFT JOIN users ON users.id = playlists.owner 
-      WHERE playlists.owner = $1`,
-      values: [owner],
+      LEFT JOIN collaborations ON collaborations.playlist_id = playlists.id 
+      WHERE playlists.owner = $1 OR collaborations.user_id = $1`,
+      values: [userId],
     });
 
     return result.rows;
@@ -58,22 +60,16 @@ class PlaylistsService {
   }
 
   async verifyPlaylistAccess(playlistId, userId) {
-    await this.verifyPlaylistOwner(playlistId, userId);
-
-    /*
     try {
-
+      await this.verifyPlaylistOwner(playlistId, userId);
     } catch (error) {
       if (error instanceof NotFoundError) throw error;
-
       try {
-        await for collaborations
-      } catch (error) {
+        await this._collaborationsService.verifyCollaborator(playlistId, userId);
+      } catch {
         throw error;
       }
-
     }
-    */
   }
 
   async addSongtoPlaylist(playlistId, songId) {
