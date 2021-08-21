@@ -78,7 +78,7 @@ const init = async () => {
       options: {
         authenticationsService,
         usersService,
-        tokenManage: TokenManager,
+        tokenManager: TokenManager,
         validator: AuthenticationsValidator,
       },
     },

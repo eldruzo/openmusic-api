@@ -5,16 +5,16 @@ const PostAuthenticationPayloadSchema = Joi.object({
   password: Joi.string().required(),
 });
 
-const PutAuthencationPayloadSchema = Joi.object({
+const PutAuthenticationPayloadSchema = Joi.object({
   refreshToken: Joi.string().required(),
 });
 
-const DeleteAuthencationPayloadSchema = Joi.object({
+const DeleteAuthenticationPayloadSchema = Joi.object({
   refreshToken: Joi.string().required(),
 });
 
 module.exports = {
   PostAuthenticationPayloadSchema,
-  PutAuthencationPayloadSchema,
-  DeleteAuthencationPayloadSchema,
+  PutAuthenticationPayloadSchema,
+  DeleteAuthenticationPayloadSchema,
 };
