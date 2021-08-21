@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
@@ -34,7 +35,7 @@ class SongsService {
     return result.rows.map(mapDBSongsToModel);
   }
 
-  async getSongById(id) {
+  async getSongById(id, checkData = false) {
     const query = {
       text: 'SELECT * FROM songs where id = $1',
       values: [id],
@@ -44,7 +45,7 @@ class SongsService {
 
     if (!result.rowCount) throw new NotFoundError('Song data not found');
 
-    return result.rows.map(mapDBSongsToModel)[0];
+    if (!checkData) return result.rows.map(mapDBSongsToModel)[0];
   }
 
   async updateSongById(id, {
