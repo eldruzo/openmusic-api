@@ -11,15 +11,13 @@ class SongsService {
     this._pool = new Pool();
   }
 
-  async addSong({
-    title, year, performer, genre, duration,
-  }) {
+  async addSong(payload) {
     const id = `song-${nanoid(16)}`;
     const insertedUpdatedAt = new Date().toISOString();
 
     const query = {
       text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
-      values: [id, title, year, performer, genre, duration, insertedUpdatedAt, insertedUpdatedAt],
+      values: [id, ...Object.values(payload), insertedUpdatedAt, insertedUpdatedAt],
     };
 
     const result = await this._pool.query(query);
@@ -48,14 +46,12 @@ class SongsService {
     if (!checkData) return result.rows.map(mapDBSongsToModel)[0];
   }
 
-  async updateSongById(id, {
-    title, year, performer, genre, duration,
-  }) {
+  async updateSongById(id, payload) {
     const updatedAt = new Date().toISOString();
 
     const query = {
       text: 'UPDATE songs set title = $1, year = $2, performer = $3, genre = $4, duration = $5, updated_at = $6 where id = $7 RETURNING id',
-      values: [title, year, performer, genre, duration, updatedAt, id],
+      values: [...Object.values(payload), updatedAt, id],
     };
 
     const result = await this._pool.query(query);

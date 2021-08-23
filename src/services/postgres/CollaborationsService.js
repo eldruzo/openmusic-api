@@ -37,7 +37,7 @@ class CollaborationsService {
       values: [playlistId, userId],
     });
 
-    if (!result.rows.length) throw new InvariantError('Collaborations verification failed');
+    if (!result.rowCount) throw new InvariantError('Collaborations verification failed');
   }
 }
 

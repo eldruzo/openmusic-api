@@ -48,11 +48,11 @@ class PlaylistsService {
 
   async verifyPlaylistOwner(id, owner) {
     const result = await this._pool.query({
-      text: 'SELECT * FROM playlists WHERE id = $1',
+      text: 'SELECT owner FROM playlists WHERE id = $1',
       values: [id],
     });
 
-    if (!result.rows.length) throw new NotFoundError('Failed to find playlist, Id was not found');
+    if (!result.rowCount) throw new NotFoundError('Failed to find playlist, Id was not found');
 
     const playlist = result.rows[0];
 

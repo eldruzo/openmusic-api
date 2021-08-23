@@ -19,7 +19,7 @@ class AuthenticationsService {
       values: [token],
     });
 
-    if (!result.rows.length) throw new InvariantError('Refresh token is not valid');
+    if (!result.rowCount) throw new InvariantError('Refresh token is not valid');
   }
 
   async deleteRefreshToken(token) {

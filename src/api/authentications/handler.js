@@ -10,9 +10,9 @@ class AuthenticationsHandler {
     autoBind(this);
   }
 
-  async postAuthenticationHandler(request, h) {
-    this._validator.validatePostAuthenticationsPayload(request.payload);
-    const { username, password } = request.payload;
+  async postAuthenticationHandler({ payload }, h) {
+    this._validator.validatePostAuthenticationsPayload(payload);
+    const { username, password } = payload;
 
     const id = await this._usersService.verifyUserCredential(username, password);
 
@@ -33,9 +33,9 @@ class AuthenticationsHandler {
     return response;
   }
 
-  async putAuthenticationHandler(request) {
-    this._validator.validatePutAuthenticationsPayload(request.payload);
-    const { refreshToken } = request.payload;
+  async putAuthenticationHandler({ payload }) {
+    this._validator.validatePutAuthenticationsPayload(payload);
+    const { refreshToken } = payload;
 
     await this._authenticationsService.verifyRefreshToken(refreshToken);
     const { id } = this._tokenManager.verifyRefreshToken(refreshToken);
@@ -51,10 +51,10 @@ class AuthenticationsHandler {
     };
   }
 
-  async deleteAuthenticationHandler(request) {
-    this._validator.validateDeleteAuthenticationsPayload(request.payload);
+  async deleteAuthenticationHandler({ payload }) {
+    this._validator.validateDeleteAuthenticationsPayload(payload);
 
-    const { refreshToken } = request.payload;
+    const { refreshToken } = payload;
 
     await this._authenticationsService.verifyRefreshToken(refreshToken);
     await this._authenticationsService.deleteRefreshToken(refreshToken);
