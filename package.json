@@ -13,11 +13,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@hapi/inert": "^6.0.3",
+    "amqplib": "^0.8.0",
     "auto-bind": "^4.0.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.24.0",
-    "nodemon": "^2.0.12"
+    "nodemon": "^2.0.12",
+    "redis": "^3.1.2"
   },
   "devDependencies": {
     "@hapi/hapi": "^20.1.0",

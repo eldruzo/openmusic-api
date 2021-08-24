@@ -3,4 +3,5 @@ node_modules
 .prod.env
 OpenMusic API V1 Test
 OpenMusic API V2 Test
+OpenMusic API V3 Test
 openmusic-api.zip
