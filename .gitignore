@@ -1,6 +1,7 @@
 node_modules
 .env
 .prod.env
+src/api/uploads/file
 OpenMusic API V1 Test
 OpenMusic API V2 Test
 OpenMusic API V3 Test
