@@ -6,10 +6,12 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class PlaylistsService {
-  constructor(songsService, collaborationsService) {
+  constructor(songsService, collaborationsService, cacheService) {
     this._pool = new Pool();
+
     this._songsService = songsService;
     this._collaborationsService = collaborationsService;
+    this._cacheService = cacheService;
   }
 
   async addPlaylist({ name, owner }) {
@@ -81,6 +83,8 @@ class PlaylistsService {
     });
 
     if (!result.rows[0].id) throw new InvariantError('Failed to add song to playlist');
+
+    await this._cacheService.delete(`playlistsongs:${playlistId}`);
   }
 
   async verifySongId(songId) {
@@ -92,14 +96,22 @@ class PlaylistsService {
   }
 
   async getPlaylistSongs(playlistId) {
-    const result = await this._pool.query({
-      text: `SELECT songs.id, songs.title, songs.performer FROM playlistsongs 
-      LEFT JOIN songs on songs.id = playlistsongs.song_id 
-      WHERE playlistsongs.playlist_id = $1`,
-      values: [playlistId],
-    });
+    try {
+      const result = await this._cacheService.get(`playlistsongs:${playlistId}`);
 
-    return result.rows;
+      return JSON.parse(result);
+    } catch {
+      const result = await this._pool.query({
+        text: `SELECT songs.id, songs.title, songs.performer FROM playlistsongs 
+        LEFT JOIN songs on songs.id = playlistsongs.song_id 
+        WHERE playlistsongs.playlist_id = $1`,
+        values: [playlistId],
+      });
+
+      await this._cacheService.set(`playlistsongs:${playlistId}`, JSON.stringify(result.rows));
+
+      return result.rows;
+    }
   }
 
   async deletePlaylistSong(playlistId, songId) {
@@ -109,6 +121,8 @@ class PlaylistsService {
     });
 
     if (!result.rows.length) throw new NotFoundError('Failed to remmove song from playlist, playlist/song id was not found');
+
+    await this._cacheService.delete(`playlistsongs:${playlistId}`);
   }
 }
 

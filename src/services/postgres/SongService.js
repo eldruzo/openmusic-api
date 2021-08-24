@@ -7,8 +7,10 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const { mapDBSongsToModel } = require('../../utils');
 
 class SongsService {
-  constructor() {
+  constructor(cacheService) {
     this._pool = new Pool();
+
+    this._cacheService = cacheService;
   }
 
   async addSong(payload) {
@@ -24,26 +26,42 @@ class SongsService {
 
     if (!result.rows[0].id) throw new InvariantError('Failed to add song data');
 
+    await this._cacheService.delete('songs-data');
+
     return result.rows[0].id;
   }
 
   async getSongs() {
-    const result = await this._pool.query('SELECT id, title, performer FROM songs');
+    try {
+      const result = await this._cacheService.get('songs-data');
+      return JSON.parse(result);
+    } catch {
+      const result = await this._pool.query('SELECT id, title, performer FROM songs');
 
-    return result.rows.map(mapDBSongsToModel);
+      await this._cacheService.set('songs-data', JSON.stringify(result.rows));
+
+      return result.rows;
+    }
   }
 
   async getSongById(id, checkData = false) {
-    const query = {
-      text: 'SELECT * FROM songs where id = $1',
-      values: [id],
-    };
+    try {
+      const result = await this._cacheService.get(`song:${id}`);
+      return JSON.parse(result);
+    } catch {
+      const query = {
+        text: 'SELECT * FROM songs where id = $1',
+        values: [id],
+      };
 
-    const result = await this._pool.query(query);
+      const result = await this._pool.query(query);
 
-    if (!result.rowCount) throw new NotFoundError('Song data not found');
+      if (!result.rowCount) throw new NotFoundError('Song data not found');
 
-    if (!checkData) return result.rows.map(mapDBSongsToModel)[0];
+      await this._cacheService.set(`song:${result.rows[0].id}`, JSON.stringify(result.rows.map(mapDBSongsToModel)[0]));
+
+      if (!checkData) return result.rows.map(mapDBSongsToModel)[0];
+    }
   }
 
   async updateSongById(id, payload) {
@@ -57,6 +75,9 @@ class SongsService {
     const result = await this._pool.query(query);
 
     if (!result.rowCount) throw new NotFoundError('Failed to update song data, ID was not found');
+
+    await this._cacheService.delete('songs-data');
+    await this._cacheService.delete(`song:${id}`);
   }
 
   async deleteSongById(id) {
@@ -68,6 +89,9 @@ class SongsService {
     const result = await this._pool.query(query);
 
     if (!result.rowCount) throw new NotFoundError('Failed to delete, ID was not found');
+
+    await this._cacheService.delete('songs-data');
+    await this._cacheService.delete(`song:${id}`);
   }
 }
 
